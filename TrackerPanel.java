@@ -14,6 +14,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
@@ -203,10 +205,12 @@ public class TrackerPanel extends JPanel implements Runnable {
 	    // callback
 	    pushDetector.getPushEvent().addObserver(new IObserver<VelocityAngleEventArgs>() {
 		public void update(IObservable<VelocityAngleEventArgs> observable, VelocityAngleEventArgs args) {
-		    System.out.printf("Push: velocity %.1f m/s, angle %.1f degs \n", args.getVelocity(), args.getAngle());
-		    // System.out.println("  " + pi); // show current hand point
-
-		    sendPunchToServer();
+		    if (args.getVelocity() > 0.3) {
+			String message = String.format("PUNCH %.2f %.2f", args.getAngle(), args.getVelocity());
+			sendMessageToServer(message);
+		    } else {
+			System.out.printf("Too Slow !! [Push] velocity %.1f m/s, angle %.1f degs \n", args.getVelocity(), args.getAngle());
+		    }
 		}
 	    });
 	} catch (GeneralException e) {
@@ -226,8 +230,12 @@ public class TrackerPanel extends JPanel implements Runnable {
 	    // general swipe callback
 	    swipeDetector.getGeneralSwipeEvent().addObserver(new IObserver<DirectionVelocityAngleEventArgs>() {
 		public void update(IObservable<DirectionVelocityAngleEventArgs> observable, DirectionVelocityAngleEventArgs args) {
-		    System.out.printf("Swipe %s: velocity %.1f m/s, angle %.1f degs \n", args.getDirection(), args.getVelocity(), args.getAngle());
-		    // System.out.println("  " + pi); // show current hand point
+		    if (args.getVelocity() > 0.3) {
+			String message = String.format("PUNCH %.2f %.2f", args.getAngle(), args.getVelocity());
+			sendMessageToServer(message);
+		    } else {
+			System.out.printf("Too Slow !! [Swipe] Direction: %s, velocity %.1f m/s, angle %.1f degs \n", args.getVelocity(), args.getAngle());			
+		    }
 		}
 	    });
 
@@ -476,11 +484,12 @@ public class TrackerPanel extends JPanel implements Runnable {
 	    g2.drawString("Loading...", 5, panelHeight - 10);
     } // end of writeStats()
 
-    private void sendPunchToServer() {
+    private void sendMessageToServer(String message) {
+	System.out.println("SENT: " + message);
 	try {
 	    Socket skt = new Socket("192.168.100.48", 9999);
 	    PrintWriter out = new PrintWriter(skt.getOutputStream(), true);
-	    out.print("PUNCH");
+	    out.print(message);
 	    out.close();
 	    skt.close();
 	} catch (Exception e) {

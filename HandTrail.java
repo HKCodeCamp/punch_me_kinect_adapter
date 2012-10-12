@@ -15,6 +15,7 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.OpenNI.DepthGenerator;
 import org.OpenNI.Point3D;
@@ -32,7 +33,7 @@ public class HandTrail {
 
     private int handID;
     private DepthGenerator depthGen;
-    private ArrayList<Point> coords; // the points that form the trail
+    private List<Point> coords; // the points that form the trail
 
     public HandTrail(int id, DepthGenerator dg) {
 	handID = id;
@@ -82,7 +83,7 @@ public class HandTrail {
 	g2.drawString("" + handID, pt.x - 6, pt.y + 6); // roughly centered
     } // end of draw()
 
-    private void drawTrail(Graphics2D g2, ArrayList<Point> coords, int numPoints)
+    private void drawTrail(Graphics2D g2, List<Point> coords, int numPoints)
     // draw (x,y) Points list as a polyline (trail)
     {
 	int[] xCoords = new int[numPoints];
