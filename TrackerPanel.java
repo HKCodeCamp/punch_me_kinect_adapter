@@ -13,9 +13,11 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.io.PrintWriter;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
@@ -234,7 +236,8 @@ public class TrackerPanel extends JPanel implements Runnable {
 			String message = String.format("PUNCH %.2f %.2f", args.getAngle(), args.getVelocity());
 			sendMessageToServer(message);
 		    } else {
-			System.out.printf("Too Slow !! [Swipe] Direction: %s, velocity %.1f m/s, angle %.1f degs \n", args.getVelocity(), args.getAngle());			
+			System.out.printf("Too Slow !! [Swipe] Direction: %s, velocity %.1f m/s, angle %.1f degs \n", args.getDirection().name(), args.getVelocity(),
+				args.getAngle());
 		    }
 		}
 	    });
@@ -486,14 +489,27 @@ public class TrackerPanel extends JPanel implements Runnable {
 
     private void sendMessageToServer(String message) {
 	System.out.println("SENT: " + message);
+//	TCP Multicast
+	
+//	try {
+//	    Socket skt = new Socket("192.168.100.48", 9999);
+//	    PrintWriter out = new PrintWriter(skt.getOutputStream(), true);
+//	    out.print(message);
+//	    out.close();
+//	    skt.close();
+//	} catch (Exception e) {
+//	    System.out.print("Whoops! It didn't work!\n");
+//	}
+
+//	UDP Multicast
 	try {
-	    Socket skt = new Socket("192.168.100.48", 9999);
-	    PrintWriter out = new PrintWriter(skt.getOutputStream(), true);
-	    out.print(message);
-	    out.close();
-	    skt.close();
-	} catch (Exception e) {
-	    System.out.print("Whoops! It didn't work!\n");
+	    MulticastSocket socket = new MulticastSocket(5000);
+	    InetAddress group = InetAddress.getByName("225.4.5.6");
+	    byte[] buf = message.getBytes();
+	    DatagramPacket packet = new DatagramPacket(buf, buf.length, group, 5000);
+	    socket.send(packet);
+	} catch (IOException e) {
+	    e.printStackTrace();
 	}
     }
 } // end of TrackerPanel class
