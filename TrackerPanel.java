@@ -13,11 +13,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
@@ -40,6 +36,7 @@ import org.OpenNI.MapOutputMode;
 import org.OpenNI.PixelFormat;
 import org.OpenNI.StatusException;
 
+import com.primesense.NITE.Direction;
 import com.primesense.NITE.DirectionVelocityAngleEventArgs;
 import com.primesense.NITE.HandEventArgs;
 import com.primesense.NITE.HandPointContext;
@@ -235,9 +232,11 @@ public class TrackerPanel extends JPanel implements Runnable {
 		public void update(IObservable<DirectionVelocityAngleEventArgs> observable, DirectionVelocityAngleEventArgs args) {
 		    if (args.getVelocity() > 0.3) {
 			int force = (int) (args.getVelocity() * 10 / 2f);
-			System.out.println("args.getVelocity() " + force);
-			String message = String.format("PUNCH UP %d", force);
-			sendMessageToServer(message);
+			if (args.getDirection() == Direction.UP || args.getDirection() == Direction.DOWN || args.getDirection() == Direction.LEFT
+				|| args.getDirection() == Direction.RIGHT) {
+			    String message = String.format("PUNCH %s %d", args.getDirection().name().toUpperCase(), force);
+			    sendMessageToServer(message);
+			}
 		    } else {
 			System.out.printf("Too Slow !! [Swipe] Direction: %s, velocity %.1f m/s, angle %.1f degs \n", args.getDirection().name(),
 				args.getVelocity(), args.getAngle());
@@ -495,8 +494,8 @@ public class TrackerPanel extends JPanel implements Runnable {
 	// TCP Multicast
 
 	try {
-	    // Socket skt = new Socket("192.168.100.48", 9999);
-	    Socket skt = new Socket("127.0.0.1", 9999);
+	    Socket skt = new Socket("192.168.100.48", 9999);
+	    // Socket skt = new Socket("127.0.0.1", 9999);
 	    PrintWriter out = new PrintWriter(skt.getOutputStream(), true);
 	    out.print(message);
 	    out.close();

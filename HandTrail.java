@@ -22,10 +22,10 @@ import org.OpenNI.Point3D;
 import org.OpenNI.StatusException;
 
 public class HandTrail {
-    private static final int MAX_POINTS = 30;
+    private static final int MAX_POINTS = 20;
 
-    private static final int CIRCLE_SIZE = 25;
-    private static final int STROKE_SIZE = 10;
+    private static final int CIRCLE_SIZE = 20;
+    private static final int STROKE_SIZE = 15;
 
     private static final Color POINT_COLORS[] = { Color.RED, Color.BLUE, Color.CYAN, Color.GREEN, Color.MAGENTA, Color.PINK, Color.YELLOW };
 
