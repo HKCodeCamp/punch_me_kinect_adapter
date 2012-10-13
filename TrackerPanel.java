@@ -208,7 +208,8 @@ public class TrackerPanel extends JPanel implements Runnable {
 	    pushDetector.getPushEvent().addObserver(new IObserver<VelocityAngleEventArgs>() {
 		public void update(IObservable<VelocityAngleEventArgs> observable, VelocityAngleEventArgs args) {
 		    if (args.getVelocity() > 0.3) {
-			String message = String.format("PUNCH %.2f %.2f", args.getAngle(), args.getVelocity());
+			int force = (int) (args.getVelocity() * 10 / 2f);
+			String message = String.format("PUNCH UP %d", force);
 			sendMessageToServer(message);
 		    } else {
 			System.out.printf("Too Slow !! [Push] velocity %.1f m/s, angle %.1f degs \n", args.getVelocity(), args.getAngle());
@@ -233,11 +234,13 @@ public class TrackerPanel extends JPanel implements Runnable {
 	    swipeDetector.getGeneralSwipeEvent().addObserver(new IObserver<DirectionVelocityAngleEventArgs>() {
 		public void update(IObservable<DirectionVelocityAngleEventArgs> observable, DirectionVelocityAngleEventArgs args) {
 		    if (args.getVelocity() > 0.3) {
-			String message = String.format("PUNCH %.2f %.2f", args.getAngle(), args.getVelocity());
+			int force = (int) (args.getVelocity() * 10 / 2f);
+			System.out.println("args.getVelocity() " + force);
+			String message = String.format("PUNCH UP %d", force);
 			sendMessageToServer(message);
 		    } else {
-			System.out.printf("Too Slow !! [Swipe] Direction: %s, velocity %.1f m/s, angle %.1f degs \n", args.getDirection().name(), args.getVelocity(),
-				args.getAngle());
+			System.out.printf("Too Slow !! [Swipe] Direction: %s, velocity %.1f m/s, angle %.1f degs \n", args.getDirection().name(),
+				args.getVelocity(), args.getAngle());
 		    }
 		}
 	    });
@@ -489,28 +492,30 @@ public class TrackerPanel extends JPanel implements Runnable {
 
     private void sendMessageToServer(String message) {
 	System.out.println("SENT: " + message);
-//	TCP Multicast
-	
-//	try {
-//	    Socket skt = new Socket("192.168.100.48", 9999);
-//	    PrintWriter out = new PrintWriter(skt.getOutputStream(), true);
-//	    out.print(message);
-//	    out.close();
-//	    skt.close();
-//	} catch (Exception e) {
-//	    System.out.print("Whoops! It didn't work!\n");
-//	}
+	// TCP Multicast
 
-//	UDP Multicast
 	try {
-	    MulticastSocket socket = new MulticastSocket(5000);
-	    InetAddress group = InetAddress.getByName("225.4.5.6");
-	    byte[] buf = message.getBytes();
-	    DatagramPacket packet = new DatagramPacket(buf, buf.length, group, 5000);
-	    socket.send(packet);
-	} catch (IOException e) {
-	    e.printStackTrace();
+	    // Socket skt = new Socket("192.168.100.48", 9999);
+	    Socket skt = new Socket("127.0.0.1", 9999);
+	    PrintWriter out = new PrintWriter(skt.getOutputStream(), true);
+	    out.print(message);
+	    out.close();
+	    skt.close();
+	} catch (Exception e) {
+	    System.out.print("Whoops! It didn't work!\n");
 	}
+
+	// UDP Multicast
+	// try {
+	// MulticastSocket socket = new MulticastSocket(5001);
+	// InetAddress group = InetAddress.getByName("225.4.5.6");
+	// byte[] buf = message.getBytes();
+	// DatagramPacket packet = new DatagramPacket(buf, buf.length, group,
+	// 5001);
+	// socket.send(packet);
+	// } catch (IOException e) {
+	// e.printStackTrace();
+	// }
     }
 } // end of TrackerPanel class
 
